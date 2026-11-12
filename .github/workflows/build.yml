@@ -4,6 +4,11 @@ on:
     branches: [master]
     tags:
       - "v*"
+  # Build, export and run the demo on PRs too, so changes (e.g. a new SQLite
+  # amalgamation) are verified on all platforms before they reach master.
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
 
 # Global Settings
 env:
@@ -230,7 +235,8 @@ jobs:
     name: Web Deploy
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.ref == 'refs/heads/master'
+    # Only deploy on real pushes to master, not on PRs or manual dispatches.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     container:
       image: barichello/godot-ci:4.7.1 # Ideally this would be ${GODOT_VERSION}, but Github Actions doesn't allow this! :(
 
